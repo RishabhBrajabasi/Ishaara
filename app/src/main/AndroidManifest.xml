@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
+    <uses-permission android:name="android.permission.GET_TASKS" />
 
     <application
         android:allowBackup="true"
@@ -16,9 +17,17 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <service
-            android:name=".paticle"
+            android:name=".AppService"
             android:enabled="true"
             android:exported="true"></service>
+        <service
+            android:name=".appFore"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".paticle"
+            android:enabled="true"
+            android:exported="true" />
 
         <activity android:name=".MainActivity">
             <intent-filter>

@@ -1,6 +1,8 @@
 package com.example.ishaara;
 
 import android.Manifest;
+import android.app.ActivityManager;
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -90,6 +92,8 @@ public class MainActivity extends AppCompatActivity {
 //        }
 //    }
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 //        CallReceiver call = new CallReceiver();
-
+//
 //        Intent intent = new Intent(Intent.ACTION_ANSWER);
 //        call.onReceive(this, intent);
 //        if(gesture.equals("<")) {
@@ -208,8 +212,14 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        });
 
-        Intent intent = new Intent(this, paticle.class);
-        startService(intent);
+//        Intent intent = new Intent(this, paticle.class);
+//        startService(intent);
+
+        Intent appF = new Intent(this, appFore.class);
+        startService(appF);
+
+        Intent appService = new Intent(this, AppService.class);
+        startService(appService);
 
     }
     @Override
