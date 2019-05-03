@@ -11,10 +11,12 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Debug;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import java.io.IOException;
 import java.util.List;
@@ -27,6 +29,7 @@ import io.particle.android.sdk.cloud.ParticleEvent;
 import io.particle.android.sdk.cloud.ParticleEventHandler;
 import io.particle.android.sdk.utils.Async;
 import io.particle.android.sdk.utils.Toaster;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 
 public class particle extends AccessibilityService {
@@ -35,6 +38,7 @@ public class particle extends AccessibilityService {
     private String password = "QsY7T249WWcSX8s"; // "Nai^pra99"
     private long subscriptionId;
     private ParticleDevice mDevice;
+    private String foreApp = "";
 
 
     @Override
@@ -55,19 +59,87 @@ public class particle extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            if (event.getPackageName() != null && event.getClassName() != null) {
-                ComponentName componentName = new ComponentName(
-                        event.getPackageName().toString(),
-                        event.getClassName().toString()
-                );
 
-                ActivityInfo activityInfo = tryGetActivity(componentName);
-                boolean isActivity = activityInfo != null;
-                if (isActivity)
-                    Log.i("BANANA", componentName.flattenToShortString());
-            }
+        int eventType = event.getEventType();
+
+
+        switch(eventType){
+
+            case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
+                Log.i("BANANA", "TYPE_WINDOW_CONTENT_CHANGED");
+                if (event.getPackageName() != null && event.getClassName() != null) {
+                    ComponentName componentName = new ComponentName(
+                            event.getPackageName().toString(),
+                            event.getClassName().toString()
+                    );
+
+                    ActivityInfo activityInfo = tryGetActivity(componentName);
+                    boolean isActivity = activityInfo != null;
+                    if (isActivity)
+                        Log.i("BANANA", "1"+componentName.flattenToShortString());
+                    foreApp = componentName.flattenToShortString();
+                }
+                break;
+            case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
+                Log.i("BANANA", "TYPE_WINDOW_STATE_CHANGED");
+                if (event.getPackageName() != null && event.getClassName() != null) {
+                    Log.d("BANANA", "PCK NAME"+event.getPackageName().toString());
+                    Log.d("BANANA", "CLS NAME"+event.getClassName().toString());
+
+                    ComponentName componentName = new ComponentName(
+                            event.getPackageName().toString(),
+                            event.getClassName().toString()
+
+                    );
+
+                    ActivityInfo activityInfo = tryGetActivity(componentName);
+                    boolean isActivity = activityInfo != null;
+                    if (isActivity)
+                        Log.i("BANANA", "2"+componentName.flattenToShortString());
+                    foreApp = componentName.flattenToShortString();
+                }
+                break;
+            case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:
+                Log.i("BANANA", "TYPE_NOTIFICATION_STATE_CHANGED");
+                if (event.getPackageName() != null && event.getClassName() != null) {
+                    ComponentName componentName = new ComponentName(
+                            event.getPackageName().toString(),
+                            event.getClassName().toString()
+                    );
+
+                    ActivityInfo activityInfo = tryGetActivity(componentName);
+                    boolean isActivity = activityInfo != null;
+                    if (isActivity)
+                        Log.i("BANANA", "3"+componentName.flattenToShortString());
+                    foreApp = componentName.flattenToShortString();
+                }
+                //for (String id : installBtnId) {
+//                    AccessibilityNodeInfo node = AccessibilityNodeInfo.
+//                            AccessibilityNodeUtil.findNodeById(event.getSource(), id);
+//                    if (node != null) {
+//                        AccessibilityNodeUtil.click(node);
+//                        Log.d("BANANA", "Some accessibility event occured");
+//                        break;
+//                    }
+//                //}
+                break;
+            default:
+                break;
         }
+//        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+//            if (event.getPackageName() != null && event.getClassName() != null) {
+//                ComponentName componentName = new ComponentName(
+//                        event.getPackageName().toString(),
+//                        event.getClassName().toString()
+//                );
+//
+//                ActivityInfo activityInfo = tryGetActivity(componentName);
+//                boolean isActivity = activityInfo != null;
+//                if (isActivity)
+//                    Log.i("BANANA", componentName.flattenToShortString());
+//                    foreApp = componentName.flattenToShortString();
+//            }
+//        }
     }
 
     private ActivityInfo tryGetActivity(ComponentName componentName) {
@@ -133,7 +205,9 @@ public class particle extends AccessibilityService {
                             new ParticleEventHandler() {
                                 public void onEvent(String eventName, ParticleEvent event) {
                                     Log.i("BANANA", "Received event with payload: " + event.dataPayload);
+                                    if(foreApp.equalsIgnoreCase(getString(R.string.youTube))){
 
+                                    }
                                 }
 
                                 public void onEventError(Exception e) {
