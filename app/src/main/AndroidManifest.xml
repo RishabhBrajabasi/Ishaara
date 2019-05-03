@@ -16,18 +16,31 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <!--<service-->
+            <!--android:name=".particle"-->
+            <!--android:enabled="true"-->
+            <!--android:exported="true" />-->
+
         <service
-            android:name=".AppService"
-            android:enabled="true"
-            android:exported="true"></service>
-        <service
-            android:name=".appFore"
-            android:enabled="true"
-            android:exported="true" />
-        <service
-            android:name=".paticle"
-            android:enabled="true"
-            android:exported="true" />
+            android:label=".particle"
+            android:name=".particle"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibilityservice"/>
+        </service>
+
+
+        <!--<service android:name=".particle"-->
+            <!--android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">-->
+            <!--<intent-filter>-->
+                <!--<action android:name="android.accessibilityservice.AccessibilityService" />-->
+            <!--</intent-filter>-->
+
+        <!--</service>-->
 
         <activity android:name=".MainActivity">
             <intent-filter>

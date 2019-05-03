@@ -1,12 +1,23 @@
 package com.example.ishaara;
 
+import android.accessibilityservice.AccessibilityService;
+import android.accessibilityservice.AccessibilityServiceInfo;
+import android.app.ActivityManager;
 import android.app.Service;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.accessibility.AccessibilityEvent;
 
 import java.io.IOException;
+import java.util.List;
 
 import io.particle.android.sdk.cloud.ParticleCloud;
 import io.particle.android.sdk.cloud.ParticleCloudException;
@@ -18,7 +29,7 @@ import io.particle.android.sdk.utils.Async;
 import io.particle.android.sdk.utils.Toaster;
 
 
-public class paticle extends Service {
+public class particle extends AccessibilityService {
 
     private String LoginID = "rishabhbrajabasi@gmail.com"; // "nchecka@andrew.cmu.edu"
     private String password = "QsY7T249WWcSX8s"; // "Nai^pra99"
@@ -26,36 +37,56 @@ public class paticle extends Service {
     private ParticleDevice mDevice;
 
 
-    public paticle() {
+    @Override
+    protected void onServiceConnected() {
+        super.onServiceConnected();
+
+        //Configure these here for compatibility with API 13 and below.
+        AccessibilityServiceInfo config = new AccessibilityServiceInfo();
+        config.eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED;
+        config.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC;
+
+        if (Build.VERSION.SDK_INT >= 16)
+            //Just in case this helps
+            config.flags = AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
+
+        setServiceInfo(config);
+    }
+
+    @Override
+    public void onAccessibilityEvent(AccessibilityEvent event) {
+        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            if (event.getPackageName() != null && event.getClassName() != null) {
+                ComponentName componentName = new ComponentName(
+                        event.getPackageName().toString(),
+                        event.getClassName().toString()
+                );
+
+                ActivityInfo activityInfo = tryGetActivity(componentName);
+                boolean isActivity = activityInfo != null;
+                if (isActivity)
+                    Log.i("BANANA", componentName.flattenToShortString());
+            }
+        }
+    }
+
+    private ActivityInfo tryGetActivity(ComponentName componentName) {
+        try {
+            return getPackageManager().getActivityInfo(componentName, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public void onInterrupt() {}
+
+    public particle() {
 
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-
-        // Start a new thread to update the TextView
-//        Thread t = new Thread() {
-//            @Override
-//            public void run() {
-//                try {
-//                    while (!isInterrupted()) {
-//                        Thread.sleep(500);
-//                        runOnUiThread(new Runnable() {
-//                            @Override
-//                            public void run() {
-////                                Log.d("BANANA", "Gesture about to be displayed :"+gesture);
-//                                display.setText(gesture);
-//                            }
-//                        });
-//                    }
-//                } catch (InterruptedException e) {
-//                    Log.d("BANANA", "Something went wrong");
-//                }
-//            }
-//        };
-//        t.start();
-//
 
         ParticleCloudSDK.init(this);
 
@@ -70,7 +101,7 @@ public class paticle extends Service {
                 } catch (IndexOutOfBoundsException ioEx) {
                     throw new RuntimeException("Your account must have at least one device for this example app to work");
                 }
-                //mDevice = sparkCloud.getDevices().get(0);
+
                 Log.d("BANANA", "analogvalue: " + mDevice.toString());
 
                 Object obj = 1;
@@ -102,13 +133,7 @@ public class paticle extends Service {
                             new ParticleEventHandler() {
                                 public void onEvent(String eventName, ParticleEvent event) {
                                     Log.i("BANANA", "Received event with payload: " + event.dataPayload);
-                                    if(eventName.matches("GestureDetected")){
-                                        Log.d("BANANA", "necessary event");
-//                                        gesture = event.dataPayload;
-//                                        display.setText(gesture);
-//                                        counter++;
-                                        //wait = false;
-                                    }
+
                                 }
 
                                 public void onEventError(Exception e) {
@@ -141,9 +166,5 @@ public class paticle extends Service {
 
 
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
+
 }
