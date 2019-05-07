@@ -22,8 +22,10 @@
             <!--android:exported="true" />-->
 
         <service
-            android:label=".particle"
             android:name=".particle"
+            android:enabled="true"
+            android:exported="true"
+            android:label=".particle"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService"/>
