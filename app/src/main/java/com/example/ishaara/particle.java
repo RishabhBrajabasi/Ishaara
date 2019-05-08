@@ -77,9 +77,15 @@ public class particle extends AccessibilityService {
         if(rootNode !=null){
             switch(event.getEventType()){
                 case AccessibilityEvent.TYPE_WINDOWS_CHANGED:
+//                    Log.d("BANANA", "TYPE_WINDOWS_CHANGED" + event.getPackageName());
+//                    Log.d("BANANA", "TYPE_WINDOWS_CHANGED Event Text " + event.getText());
+
                     Log.d("BANANA", "Current Active Window " + event.getPackageName());
                     break;
                 case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
+//                    Log.d("BANANA", "TYPE_WINDOW_CONTENT_CHANGED" + event.getPackageName());
+//                    Log.d("BANANA", "TYPE_WINDOW_CONTENT_CHANGED Event Text " + event.getText());
+
                     //if(!event.getPackageName().equals("net.oneplus.launcher")) {
                     if(getPackageName() == null) {
                         currActiveWindow = "";
@@ -92,26 +98,53 @@ public class particle extends AccessibilityService {
                         numChildren = rootNode.getChildCount();
                         for(int i = 0; i < numChildren; i++){
                             //Log.d("BANANA", "Child Name " + rootNode.getChild(i));
-                            CharSequence contentDesc = rootNode.getChild(i).getContentDescription();
-                            Log.d("BANANA", "Child Description " + contentDesc);
-                            if(currActiveWindow.equals("net.oneplus.launcher")) {
-                                if (contentDesc != null && contentDesc.toString().equals("WhatsApp")) {
-                                    nodeWhatsapp = rootNode.getChild(i);
+                            if(rootNode.getChild(i) != null) {
+
+                                CharSequence contentDesc = rootNode.getChild(i).getContentDescription();
+                                if(contentDesc == null) {
+                                    continue;
                                 }
-                                if (contentDesc != null && contentDesc.toString().equals("Gmail")) {
-                                    nodeGmail = rootNode.getChild(i);
+                                 Log.d("BANANA", "Child Description " + contentDesc);
+                                if (currActiveWindow.equals("com.oneplus.aod")) {
+                                    if(contentDesc.toString().startsWith("Spotify")){
+
+                                         int innerChild = rootNode.getChild(i).getChildCount();
+                                        Log.d("BANANA", "InnerChild " + innerChild);
+                                         for(int k = 0; k < innerChild; k++) {
+                                                Log.d("BANANA_SPOT", "Child Description " + rootNode.getChild(k).getChild(k).getContentDescription());
+
+                                        }
+                                    }
+
                                 }
-                                if (contentDesc != null && contentDesc.toString().equals("YouTube")) {
-                                    nodeYoutube = rootNode.getChild(i);
+
+                                if (currActiveWindow.equals("net.oneplus.launcher")) {
+                                    if (contentDesc != null && contentDesc.toString().equals("WhatsApp")) {
+                                        nodeWhatsapp = rootNode.getChild(i);
+                                    }
+                                    if (contentDesc != null && contentDesc.toString().equals("Gmail")) {
+                                        nodeGmail = rootNode.getChild(i);
+                                    }
+                                    if (contentDesc != null && contentDesc.toString().equals("YouTube")) {
+                                        nodeYoutube = rootNode.getChild(i);
+                                    }
+                                    if (contentDesc != null && contentDesc.toString().equals("Camera")) {
+                                        nodeCamera = rootNode.getChild(i);
+                                    }
+                                    if (contentDesc != null && contentDesc.toString().equals("Phone")) {
+                                        nodePhone = rootNode.getChild(i);
+                                    }
+                                    if (contentDesc != null && contentDesc.toString().equals("Phone")) {
+                                        nodePhone = rootNode.getChild(i);
+                                    }
+
                                 }
-                                if (contentDesc != null && contentDesc.toString().equals("Camera")) {
-                                    nodeCamera = rootNode.getChild(i);
-                                }
-                                if (contentDesc != null && contentDesc.toString().equals("Phone")) {
-                                    nodePhone = rootNode.getChild(i);
-                                }
-                            }
+
                             if(currActiveWindow.equals("com.oneplus.camera")){
+                                for(int k = 0 ;k<rootNode.getChildCount();k++){
+                                    Log.d("BANANA", "Child Camera :"+k+":"+rootNode.getChild(k).getContentDescription());
+                                }
+
                                 if (contentDesc != null && contentDesc.toString().equals("Capture")){
                                     nodeCapture = rootNode.getChild(i);
 //                                    rootNode.getChild(i).setClickable(true);
@@ -120,18 +153,44 @@ public class particle extends AccessibilityService {
                                     nodeCamSwitch = rootNode.getChild(i);
                                 }
                             }
-                        }
+                        }}
 
                         //If content is camera the capture button can be found
                     //}
                     break;
                 case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:
-                    Log.d("BANANA", "Notification State Change " + event.getPackageName());
+                    Log.d("BANANA_NOTIFICATION", "Notification State Change " + event.getPackageName());
+                    Log.d("BANANA_NOTIFICATION", "Event Text " + event.getText());
+
+                    notificationContent = "";
                     //Need to check the root nodes children
                     numChildren = rootNode.getChildCount();
                     for(int i = 0; i < numChildren; i++){
-                        Log.d("BANANA", "Child Name " + rootNode.getChild(i));
-                        Log.d("BANANA", "Child Description " + rootNode.getChild(i).getContentDescription());
+//                        Log.d("BANANA", "Child Name " + rootNode.getChild(i));
+                        if(rootNode.getChild(i) == null){
+                            continue;
+                        }
+                        Log.d("BANANA_NOTIFICATION", "Child Description " + rootNode.getChild(i).getContentDescription());
+
+                        CharSequence desc =rootNode.getChild(i).getContentDescription();
+                        if(desc == null){
+                            continue;
+                        }
+
+
+                        if(desc.toString().startsWith("WhatsApp")){
+
+                            notificationContent = notificationContent + "You've unread WhatsApp messages";
+                        }
+                        if(desc.toString().startsWith("Gmail")){
+
+                            notificationContent = notificationContent + "You've got mail !";
+                        }
+                        if(desc.toString().startsWith("Phone")){
+
+                            notificationContent = notificationContent + "You've got missed calls ";
+
+                        }
                     }
                     break;
 
@@ -188,6 +247,7 @@ public class particle extends AccessibilityService {
                     subscriptionId = ParticleCloudSDK.getCloud().subscribeToMyDevicesEvents(
                             null,  // the first argument, "eventNamePrefix", is optional
                             new ParticleEventHandler() {
+                                @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
                                 public void onEvent(String eventName, ParticleEvent event) {
                                     Log.i("BANANA", "Received event " +eventName+" with payload: " + event.dataPayload);
                                     if(eventName.equals("GestureDetected")) {
@@ -203,6 +263,10 @@ public class particle extends AccessibilityService {
                                             else if(currActiveWindow.equals("net.oneplus.launcher")) {
                                                 nodeYoutube.performAction(AccessibilityNodeInfo.ACTION_CLICK);
                                             }
+                                            else{
+                                                Log.i("BANANA_NOTIFICATION", "notification");
+                                                talker.speak(notificationContent, TextToSpeech.QUEUE_FLUSH, null);
+                                            }
                                         }
                                         if(event.dataPayload.equals("U")){
                                             //nodePhone.setTraversalBefore();
@@ -211,7 +275,8 @@ public class particle extends AccessibilityService {
                                             nodeCamera.performAction(AccessibilityNodeInfo.ACTION_CLICK);
                                             if(currActiveWindow.equals("com.oneplus.camera")){
                                                 Log.i("BANANA", "Performing action for CamSwitch " +currActiveWindow);
-                                                nodeCapture.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                                                Log.i("BANANA", "actions available " +nodeCamSwitch.getActionList());
+                                                nodeCamSwitch.performAction(AccessibilityNodeInfo.ACTION_CLICK);
                                             }
                                         }
                                         if(event.dataPayload.equals("R")){
