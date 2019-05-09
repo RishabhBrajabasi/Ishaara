@@ -46,6 +46,7 @@ public class particle extends AccessibilityService {
     String camera = "net.sourceforge.opencamera"; // net.sourceforge.opencamera
     String currActiveWindow = "";
     String music = "com.spotify.music";
+    String phone = "com.android.dialer";
 
     //Need to read out notifications for
     //0 - whatsapp
@@ -113,7 +114,7 @@ public class particle extends AccessibilityService {
                         Log.d("BANANA_WIN_CONTENT", "Child Desc: "+ childContentDesc);
                         if(childContentDesc == null){
                             int numGrandChildren = rootNode.getChild(i).getChildCount();
-                            Log.d("BANANA_NOTI_CHANGED:", "Number of GrandChildren: "+ numGrandChildren);
+                            Log.d("BANANA_WIN_CONTENT:", "Number of GrandChildren: "+ numGrandChildren);
                             for(int j = 0; j < numGrandChildren; j++) {
                                 if(rootNode.getChild(i).getChild(j) == null) {
                                     continue;
@@ -123,8 +124,33 @@ public class particle extends AccessibilityService {
                                     continue;
 //                                    int numGrandChildren = rootNode.getChild(i).getChildCount();
                                 }
-                                Log.d("BANANA_WIN_CONTENT", "Child Desc: "+ grandChildContentDesc);
-                            }
+                                Log.d("BANANA_WIN_CONTENT", "Grand Child Desc: "+ grandChildContentDesc);
+                                if(currActiveWindow.equals(music)){
+                                    if(grandChildContentDesc.toString().equals("Play") || grandChildContentDesc.toString().equals("Pause")){
+                                        gestureTap = rootNode.getChild(i).getChild(j);
+                                    }
+                                    else if(grandChildContentDesc.toString().equals("Previous")){
+                                        gestureLeft = rootNode.getChild(i).getChild(j);
+                                    }
+                                    else if(grandChildContentDesc.toString().equals("Next")){
+                                        gestureRight = rootNode.getChild(i).getChild(j);
+                                    }
+                                }
+                                if(currActiveWindow.equals("com.android.systemui") || currActiveWindow.equals(phone)){
+                                    Log.d("BANANA", "Enteredddddddddd syssui");
+                                    if(grandChildContentDesc.toString().startsWith("Phone notification")){
+                                        int greatgrand = rootNode.getChild(i).getChild(j).getChildCount();
+                                        Log.d("BANANA_WIN_CONTENT", "Great Grand Child NUM: "+ greatgrand);
+                                        for(int k = 0; k < greatgrand; k++){
+                                            CharSequence greatgrandCont = rootNode.getChild(i).getChild(j).getChild(k).getContentDescription();
+                                            if(greatgrandCont == null){
+                                                continue;
+                                            }
+                                            Log.d("BANANA_WIN_CONTENT", " Great Grand Child Desc: "+ grandChildContentDesc);
+                                        }
+                                    }
+                                }
+                            } //Grandchild for
                             continue;
                         }
                         if(currActiveWindow.equals(homeScreen)){
@@ -164,6 +190,9 @@ public class particle extends AccessibilityService {
                             if(childContentDesc.toString().equals("Play") || childContentDesc.toString().equals("Pause")){
                                 gestureTap = rootNode.getChild(i);
                             }
+                            else if(childContentDesc.toString().equals("Show Now Playing")){
+                                gestureRight = rootNode.getChild(i);
+                            }
                         }
                         else if(currActiveWindow.equals(lockedScreen)){
                             if(childContentDesc.toString().startsWith("WhatsApp")){
@@ -195,10 +224,24 @@ public class particle extends AccessibilityService {
                         }
                         CharSequence childContentDesc = rootNode.getChild(i).getContentDescription();
                         if (childContentDesc == null) {
-                            int numGrandChildren = rootNode.getChild(i).getChildCount();
-                            Log.d("BANANA_NOTI_CHANGED:", "Number of Children: "+ numGrandChildren);
+
                             continue;
                         }
+                        Log.d("BANANA_NOTI_CHANGED", "Child Desc: "+ childContentDesc);
+                        int numGrandChildren = rootNode.getChild(i).getChildCount();
+                        Log.d("BANANA_NOTI_CHANGED:", "Number of Grand Children: "+ numGrandChildren);
+                        for(int j = 0; j < numGrandChildren; j++){
+                            if(rootNode.getChild(i).getChild(j) == null){
+                                continue;
+                            }
+                            CharSequence grandChildContentDesc =rootNode.getChild(i).getChild(j).getContentDescription();
+                            if(grandChildContentDesc == null) {
+                                continue;
+//                                    int numGrandChildren = rootNode.getChild(i).getChildCount();
+                            }
+                            Log.d("BANANA_NOTI_CONTENT", "Grand Child Desc: "+ grandChildContentDesc);
+                        }
+
                         if(childContentDesc.toString().startsWith("WhatsApp")){
                             nodeNotifications[1] = rootNode.getChild(i);
                             readOutNotifications[1] = "You've Unread Whatsapp Messages";
@@ -277,7 +320,7 @@ public class particle extends AccessibilityService {
                                                 if(currAddress == 0) {
                                                     talker.speak(readOutNotifications[0], TextToSpeech.QUEUE_FLUSH, null);
                                                 }
-                                                else {
+                                                else if(nodeNotifications[currAddress]!=null){
                                                     nodeNotifications[currAddress].performAction(AccessibilityNodeInfo.ACTION_CLICK);
                                                 }
                                             }
